@@ -7,12 +7,12 @@
     }
 
     function testShouldAdd(){
-      viewModel.addItem('item');
+      viewModel.addItem({subscribe: function(){}});
       assertEqual(1,viewModel.items().length);
     }
 
     function testShouldRemoveItem(){
-      var item = 'zing';
+      var item = {subscribe: function(){}};
       viewModel.addItem(item);
       viewModel.removeItem(item);
       assertEqual(0,viewModel.items().length);
@@ -25,26 +25,30 @@
       assertInstanceOf(TodoItem, viewModel.items()[0]);
     }
 
-    function testShouldReturnCompleteItems(){
-      viewModel.addItem({complete: function(){return true;}});
-      viewModel.addItem({complete: function(){return true;}});
-      viewModel.addItem({complete: function(){return false;}});
+    function addItem(complete)
+    {
+      viewModel.addItem({subscribe: function(){}, complete: function(){return complete;}});
+    }
 
+    function testShouldReturnCompleteItems(){
+      addItem(true);
+      addItem(true);
+      addItem(false);
       assertEqual(2, viewModel.completed().length);
     }
 
     function testShouldReturnRemainingItems(){
-      viewModel.addItem({complete: function(){return true;}});
-      viewModel.addItem({complete: function(){return true;}});
-      viewModel.addItem({complete: function(){return false;}});
+      addItem(true);
+      addItem(true);
+      addItem(false);
 
       assertEqual(1, viewModel.remaining().length);
     }
 
     function testShouldClearCompleted(){
-      viewModel.addItem({complete: function(){return true;}});
-      viewModel.addItem({complete: function(){return true;}});
-      viewModel.addItem({complete: function(){return false;}});
+      addItem(true);
+      addItem(true);
+      addItem(false);
 
       viewModel.clearCompleted();
 
@@ -99,6 +103,28 @@
     }
   }
 
+  var store;
+  function storageTests(){
+    function setUp(){
+      localStorage = {};
+      store = new Store('blah');
+    }
 
-  this.unitTests = [viewModelTests, todoItemTests];
+    function testShouldStoreInLocalStorage(){
+      var hit = false;
+      localStorage.setItem = function(){hit = true;};
+      store.persist([1,2,3], function(i){return i;});
+      assertTrue(hit);
+    }
+
+    function testShouldPullFromLocalStorage(){
+      var json = JSON.stringify([1,2,3]);
+      localStorage.getItem = function(){return json;};
+      var result = store.load(function(i){return i;});
+      assertEqual([1,2,3], result);
+    }
+  }
+
+
+  this.unitTests = [viewModelTests, todoItemTests, storageTests];
 }());

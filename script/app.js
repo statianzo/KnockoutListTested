@@ -1,10 +1,25 @@
 function App() {
+  var store = new Store('knockoutList');
+
+  function persistItems() {
+    store.persist(viewModel.items(), function(item){
+      return ko.toJS(item);
+    });
+  }
+
+  function loadItems() {
+    var items = store.load(function(item){
+      return new TodoItem(item.value, viewModel.removeItem, item.complete);
+    });
+    _.each(items, viewModel.addItem);
+  }
 
   var viewModel = {
     items: ko.observableArray(),
     currentText: ko.observable(''),
 
     addItem: function(item){
+      item.subscribe(persistItems);
       viewModel.items.push(item);
     },
     removeItem: function(item){
@@ -12,7 +27,7 @@ function App() {
     },
     createItem: function(){
       var item = new TodoItem(viewModel.currentText(), viewModel.removeItem);
-      viewModel.items.push(item);
+      viewModel.addItem(item);
       viewModel.currentText('');
     },
     remaining: function(){
@@ -35,15 +50,17 @@ function App() {
   this.viewModel = viewModel;
 
   this.run = function(){
+    loadItems();
+    viewModel.items.subscribe(persistItems);
     ko.applyBindings(viewModel);
   };
 }
 
-function TodoItem(value, remove) {
+function TodoItem(value, remove, complete) {
   this.value = ko.observable(value);
   this.remove = remove;
   this.mode = ko.observable('view');
-  this.complete = ko.observable(false);
+  this.complete = ko.observable(!!complete);
 }
 
 TodoItem.prototype.destroy = function(){
@@ -52,8 +69,31 @@ TodoItem.prototype.destroy = function(){
 
 TodoItem.prototype.edit = function(){
   this.mode('edit');
-}
+};
 
 TodoItem.prototype.save = function(){
   this.mode('view');
+};
+
+TodoItem.prototype.subscribe = function(handler){
+  this.complete.subscribe(handler);
+  this.value.subscribe(handler);
+};
+
+function Store(storeName) {
+  this.persist = function(items, transform) {
+    var data = _.map(items, transform);
+    localStorage.setItem(storeName, JSON.stringify(data));
+  };
+
+  this.load = function(itemSetup) {
+    var previous = localStorage.getItem(storeName),
+        items = [],
+        data;
+    if (previous) {
+      data = JSON.parse(previous);
+      items = _.map(data, itemSetup);
+    }
+    return items;
+  }
 }
