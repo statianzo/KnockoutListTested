@@ -1,8 +1,14 @@
-var app = (function(){
+function App() {
 
-  var viewModel = {};
-
-  return {
-    viewModel: viewModel
+  var viewModel = {
+    items: ko.observableArray(),
+    addItem: function(item){
+      viewModel.items.push(item);
+    },
+    removeItem: function(item){
+    viewModel.items.remove(item);
+    }
   };
-}());
+
+  this.viewModel = viewModel;
+}
