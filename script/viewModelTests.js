@@ -18,10 +18,37 @@
       assertEqual(0,viewModel.items().length);
     }
 
-    function testShouldCreateItemFromCurrentText(){
+    function testShouldCreateTodoItemFromCurrentText(){
       viewModel.currentText('Oh Snap');
       viewModel.createItem();
       assertEqual(1,viewModel.items().length);
+      assertInstanceOf(TodoItem, viewModel.items()[0]);
+    }
+
+    function testShouldReturnCompleteItems(){
+      viewModel.addItem({complete: function(){return true;}});
+      viewModel.addItem({complete: function(){return true;}});
+      viewModel.addItem({complete: function(){return false;}});
+
+      assertEqual(2, viewModel.completed().length);
+    }
+
+    function testShouldReturnRemainingItems(){
+      viewModel.addItem({complete: function(){return true;}});
+      viewModel.addItem({complete: function(){return true;}});
+      viewModel.addItem({complete: function(){return false;}});
+
+      assertEqual(1, viewModel.remaining().length);
+    }
+
+    function testShouldClearCompleted(){
+      viewModel.addItem({complete: function(){return true;}});
+      viewModel.addItem({complete: function(){return true;}});
+      viewModel.addItem({complete: function(){return false;}});
+
+      viewModel.clearCompleted();
+
+      assertEqual(1, viewModel.items().length);
     }
   }
 

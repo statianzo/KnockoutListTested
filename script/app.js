@@ -11,9 +11,18 @@ function App() {
       viewModel.items.remove(item);
     },
     createItem: function(){
-      var item = viewModel.currentText();
+      var item = new TodoItem(viewModel.currentText(), viewModel.removeItem);
       viewModel.items.push(item);
       viewModel.currentText('');
+    },
+    remaining: function(){
+      return _.select(viewModel.items(), function(i){return !i.complete();});
+    },
+    completed: function(){
+      return _.select(viewModel.items(), function(i){return i.complete();});
+    },
+    clearCompleted: function() {
+      _.each(viewModel.completed(), function(i){viewModel.removeItem(i);});
     }
   };
 
