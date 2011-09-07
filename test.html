@@ -15,7 +15,7 @@
         document.write("<div>" + s + "</div>");
       };
       jsUnity.attachAssertions();
-      jsUnity.run(viewModelTests);
+      jsUnity.run.apply(jsUnity,unitTests);
       
     </script>
   </body>
