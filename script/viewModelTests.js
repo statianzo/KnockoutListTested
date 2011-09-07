@@ -50,6 +50,20 @@
 
       assertEqual(1, viewModel.items().length);
     }
+
+    function testShouldRenderItemsAccordingToMode(){
+      var result = viewModel.render({mode: function(){return 'modeName'}});
+      assertEqual('modeNameItem', result);
+    }
+
+    function testShouldPluralizeTheWordItem(){
+      assertEqual('items', viewModel.pluralize(0));
+      assertEqual('items', viewModel.pluralize(2));
+    }
+
+    function testShouldNotPluralizeTheWordItemWhenOne(){
+      assertEqual('item', viewModel.pluralize(1));
+    }
   }
 
   var todoItem;

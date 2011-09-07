@@ -21,12 +21,22 @@ function App() {
     completed: function(){
       return _.select(viewModel.items(), function(i){return i.complete();});
     },
-    clearCompleted: function() {
+    clearCompleted: function(){
       _.each(viewModel.completed(), function(i){viewModel.removeItem(i);});
+    },
+    render: function(item){
+      return item.mode() + 'Item';
+    },
+    pluralize: function(count){
+      return count === 1 ? 'item' : 'items';
     }
   };
 
   this.viewModel = viewModel;
+
+  this.run = function(){
+    ko.applyBindings(viewModel);
+  };
 }
 
 function TodoItem(value, remove) {
